@@ -222,7 +222,7 @@ function paint(){
  drawBase(cx,hw,hh,pk);drawEdge(cx,hw,hh,pk);
 }
 function lerp(a,b,t){return a+(b-a)*t}
-var FORCE=(/[?&]itb=(full|lite|auto)/.exec(location.search)||[])[1],Q=navigator.deviceMemory&&navigator.deviceMemory<=2?1:0,FQ=[];try{if(FORCE==='auto')localStorage.removeItem('itbQ2');Q=Math.min(2,Math.max(Q,+localStorage.getItem('itbQ2')||0))}catch(_){}if(FORCE==='full')Q=0;else if(FORCE==='lite')Q=1;
+var FORCE=(/[?&]itb=(full|lite|auto)/.exec(location.search)||[])[1],Q=navigator.deviceMemory&&navigator.deviceMemory<=2?2:0,FQ=[];try{if(FORCE==='auto')localStorage.removeItem('itbQ2');Q=Math.min(2,Math.max(Q,+localStorage.getItem('itbQ2')||0))}catch(_){}if(FORCE==='full')Q=0;else if(FORCE==='lite')Q=1;
 function setQ(q){Q=q;FQ=[];if(!FORCE||FORCE==='auto')try{localStorage.setItem('itbQ2',q)}catch(_){}if(Q>1){var g=$('glass').style;g.webkitBackdropFilter=g.backdropFilter='none'}}
 if(Q>1)setQ(Q);
 function tick(now){try{return tick_(now)}catch(_){basic()}}
@@ -251,8 +251,13 @@ barEl.addEventListener('keydown',function(e){var d=e.key==='ArrowRight'?1:e.key=
 function resize(){fit=Math.min(1,(window.innerWidth-16)/(BW*1.06));if(BASIC){barEl.style.transform='scale('+fit+')';return}sizeCanvas();paint()}
 window.addEventListener('resize',resize);
 try{if(!window.Path2D||!window.CanvasRenderingContext2D)throw 0;setSel(0);buildTex();resize();go()}catch(_){basic();setSel(0)}
-function warm(){if(!texW)return;if(raf||pressing){setTimeout(warm,400);return}try{for(var k=0;k<5;k++){var c=70+55*k;drawBase(c,61.8,30,1);drawEdge(c,61.8,30,1)}for(var i=0;i<4;i++){redrawIcon(i,.12);redrawIcon(i,null)}bctx.getImageData(0,0,1,1);ectx.getImageData(0,0,1,1)}catch(_){}paint()}
-function idle(f){(window.requestIdleCallback||function(g){setTimeout(g,120)})(f,{timeout:1200})}
+function warm(){if(!texW)return;if(raf||pressing){setTimeout(warm,400);return}try{for(var k=0;k<5;k++){var c=70+55*k;drawBase(c,61.8,30,1);drawEdge(c,61.8,30,1)}for(var i=0;i<4;i++){redrawIcon(i,.12);redrawIcon(i,null)}
+  var S=[an,Lx,Rx,lensV,flashV,scaleV,holdX,wNom,curH,clock,downAt];startTap(sel<2?sel+2:sel-2);an.rel=0;for(k=0;k<14;k++){clock+=.035;stepAnim(.035);paint()}
+  an=S[0];Lx=S[1];Rx=S[2];lensV=S[3];flashV=S[4];scaleV=S[5];holdX=S[6];wNom=S[7];curH=S[8];clock=S[9];downAt=S[10];
+  bctx.getImageData(0,0,1,1);ectx.getImageData(0,0,1,1)}catch(_){}paint();
+ barEl.style.transform='scale('+(fit*1.002).toFixed(4)+')';flEl.style.opacity='.02';lastTf=lastFo='';
+ requestAnimationFrame(function(){requestAnimationFrame(function(){if(!raf)paint()})})}
+function idle(f){(window.requestIdleCallback||function(g){setTimeout(g,120)})(f,{timeout:400})}
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){if(BASIC)return;buildTex();paint();idle(warm)});else idle(warm);
 })();
 </script>
