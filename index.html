@@ -241,7 +241,9 @@ barEl.addEventListener('keydown',function(e){var d=e.key==='ArrowRight'?1:e.key=
 function resize(){fit=Math.min(1,(window.innerWidth-16)/(BW*1.06));sizeCanvas();paint()}
 window.addEventListener('resize',resize);
 setSel(0);buildTex();resize();go();
-if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){buildTex();paint()});
+function warm(){if(!texW)return;if(raf||pressing){setTimeout(warm,400);return}try{for(var k=0;k<5;k++){var c=70+55*k;drawBase(c,61.8,30,1);drawEdge(c,61.8,30,1)}for(var i=0;i<4;i++){redrawIcon(i,.12);redrawIcon(i,null)}bctx.getImageData(0,0,1,1);ectx.getImageData(0,0,1,1)}catch(_){}paint()}
+function idle(f){(window.requestIdleCallback||function(g){setTimeout(g,120)})(f,{timeout:1200})}
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){buildTex();paint();idle(warm)});else idle(warm);
 })();
 </script>
 </body></html>
