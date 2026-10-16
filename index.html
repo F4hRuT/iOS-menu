@@ -43,7 +43,8 @@ var BW=359.84,BH=62.0,CX0=53.8,PITCH=84.2;
 var PW=99.33,PH=54,LW=123.6,HMAX=60,LH=60,LHT=59;
 var $=function(i){return document.getElementById(i)};
 var PHI=52.4*Math.PI/180,ARAT=1.889;
-function pxr(){var r=window.devicePixelRatio||1;if(r<2&&(navigator.maxTouchPoints>0||'ontouchstart' in window))r=3;return Math.min(3,Math.max(2,r))}
+var IOS=/iP(hone|od|ad)/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&'ontouchend' in document);
+function pxr(){var r=window.devicePixelRatio||1;if(IOS)r=3;else if(r<2&&(navigator.maxTouchPoints>0||'ontouchstart' in window))r=3;return Math.min(3,Math.max(2,r))}
 function r2(n){return Math.round(n*100)/100}
 function path(W,H,ox,oy){
  var R=H/2,c=Math.cos(PHI),s=Math.sin(PHI),qx=R*(1-c),qy=R*(1-s),b1=qx+qy*s/c,b2=b1+1.5*Math.pow(qy/c,2)/(R*c),a=Math.max(Math.min(ARAT*R,W/2),b2),k=Math.min(1,W/(2*a));
@@ -76,7 +77,8 @@ var FILL=[[0,.16],[.008,.152],[.016,.138],[.024,.131],[.032,.126],[.048,.118],[.
  for(var y=0;y<H;y++){var u=(y+.5)/H,i=0;while(i<FILL.length-2&&FILL[i+1][0]<u)i++;var a=FILL[i],b=FILL[i+1],q=(u-a[0])/(b[0]-a[0]),A=(a[1]+(b[1]-a[1])*q)*255;
   for(var xx=0;xx<W;xx++,k+=4){d[k]=d[k+1]=d[k+2]=255;d[k+3]=Math.floor(A+rnd())}}
  x.putImageData(im,0,0);$('glass').style.background='url('+cv.toDataURL()+') 0 0 / '+(W/(dpr*2)).toFixed(3)+'px 100% repeat-x'})();
-(function(){var g=$('glass').style,cp="path('"+path(BW,BH,0,0)+"')",ok=window.CSS&&CSS.supports&&(CSS.supports('clip-path',cp)||CSS.supports('-webkit-clip-path',cp));if(ok){g.clipPath=cp;g.webkitClipPath=cp}else{g.borderRadius=BH/2+'px';g.overflow='hidden'}})();
+(function(){var g=$('glass').style,cp="path('"+path(BW,BH,0,0)+"')",ok=window.CSS&&CSS.supports&&(CSS.supports('clip-path',cp)||CSS.supports('-webkit-clip-path',cp));if(ok){g.clipPath=cp;g.webkitClipPath=cp}else{var m='url("data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+BW+' '+BH+'" preserveAspectRatio="none"><path d="'+path(BW,BH,0,0)+'"/></svg>')+'")';
+ g.webkitMaskImage=g.maskImage=m;g.webkitMaskSize=g.maskSize='100% 100%';g.webkitMaskRepeat=g.maskRepeat='no-repeat';if(!g.webkitMaskImage&&!g.maskImage){g.borderRadius=BH/2+'px';g.overflow='hidden'}}})();
 var PADX=30,PADY=14,CW=BW+2*PADX,CH=BH+2*PADY,baseC=$('base'),bctx=baseC.getContext('2d');
 var DPR=pxr(),TS=Math.max(2,DPR),texW=null,texO=null,texOS=null;
 function bb(d){var xs=[],ys=[];d.split(/(?=M)/).forEach(function(s){var n=s.match(/-?\d*\.?\d+/g).map(Number),x=n[0],y=n[1];xs.push(x);ys.push(y);for(var j=2;j<n.length;j+=2){x+=n[j];y+=n[j+1];xs.push(x);ys.push(y)}});return [xs,ys]}
@@ -258,8 +260,13 @@ function warm(){if(!texW)return;if(raf||pressing){setTimeout(warm,400);return}tr
   bctx.getImageData(0,0,1,1);ectx.getImageData(0,0,1,1)}catch(_){}paint();
  barEl.style.transform='scale('+(fit*1.002).toFixed(4)+')';flEl.style.opacity='.02';lastTf=lastFo='';
  requestAnimationFrame(function(){requestAnimationFrame(function(){if(!raf)paint()})})}
+function dbg(){if(!/[?&]itbdbg/.test(location.search))return;var c=document.createElement('canvas'),k=pxr(),x;c.width=180*k;c.height=24*k;c.style.cssText='width:180px;height:24px;vertical-align:middle';x=c.getContext('2d');x.scale(k,k);x.fillStyle='#fff';x.font='500 13px '+FONT;x.fillText('Canvas: Тариф Расходы',2,17);
+ var d=document.createElement('div');d.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99;background:#000;color:#0f0;font:12px/1.4 monospace;padding:8px;border-radius:8px;white-space:pre-wrap';
+ d.textContent='itb v69\nUA iOS: '+IOS+'\ndevicePixelRatio: '+window.devicePixelRatio+'  -> used: '+k+'\ninnerWidth: '+innerWidth+'  screen: '+screen.width+'x'+screen.height+'\nbase canvas: '+baseC.width+'x'+baseC.height+' px, css '+baseC.clientWidth+'px\nmode Q: '+Q+(FORCE?' (forced '+FORCE+')':'')+'  basic: '+BASIC+'\nclip-path: '+!!$('glass').style.clipPath+'  mask: '+!!($('glass').style.webkitMaskImage||$('glass').style.maskImage)+'\nPointerEvent: '+!!window.PointerEvent+'  deviceMemory: '+navigator.deviceMemory+'\n';
+ var t=document.createElement('span');t.textContent='DOM: Тариф Расходы';t.style.cssText='font:500 13px '+FONT+';color:#fff;margin-left:8px';d.appendChild(c);d.appendChild(t);document.body.appendChild(d)}
 function idle(f){(window.requestIdleCallback||function(g){setTimeout(g,120)})(f,{timeout:400})}
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){if(BASIC)return;buildTex();paint();idle(warm)});else idle(warm);
+try{dbg()}catch(_){}
 })();
 </script>
 </body></html>
